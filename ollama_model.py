@@ -28,7 +28,8 @@ class OllamaModel(GPTModel):
         self.prompt = prompt
         self.history.append({'role': self.role, 'content': prompt})
         try:
-            response = ollama.chat(model=self.model, messages=self.history, max_tokens=self.max_tokens, temperature=self.temperature)
+            #response = ollama.chat(model=self.model, messages=self.history, max_tokens=self.max_tokens, temperature=self.temperature)
+            response = ollama.chat(model=self.model, messages=self.history)
         except Exception as e:
             return f"A model error occurred: {e}"
         self.history.append({'role': self.role, 'content': response['message']['content']})
@@ -54,7 +55,7 @@ class OllamaModel(GPTModel):
 
 # Example usage
 if __name__ == "__main__":
-    models = ["llama2-uncensored", "llama3.2"]
+    models = ["llama2-uncensored:latest", "gemma2:2b", "phi3.5:latest"]
     prompts = ["Hello!"]
 
     for model in models:

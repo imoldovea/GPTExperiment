@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 # Step 1: Define the GPT Interface
 class GPTModel(ABC):
     @abstractmethod
-    def generate_response(self, prompt: str) -> str:
+    def generate_response(self, prompt, use_history:bool) -> str:
         pass
 
     @abstractmethod

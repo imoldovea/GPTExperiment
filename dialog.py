@@ -12,7 +12,7 @@ except FileNotFoundError:
     raise FileNotFoundError("The configuration file 'config.properties' was not found.")
 
 def print_dialog(provider_model: str, response: str, sequence_number: int):
-    print(f"[94m{provider_model} [{sequence_number}][0m {response}")
+    print(f"[94m{provider_model} [{sequence_number}][0m : {response}")
 
 def generate_and_print_response(model, prompt, sequence_number):
     response = model.generate_response(prompt)
@@ -24,10 +24,12 @@ def create_dialog_models():
     Factory method to create the two models involved in the dialog.
     Modify provider and model values to use different combinations as needed.
     """
-    llm1 = GPTFactory.create_gpt_model("Ollama", "llama3.2:3b","user")
-    llm2 = GPTFactory.create_gpt_model("ChatGPT", "gpt-4-turbo", "assistant")
+    #llm1 = GPTFactory.create_gpt_model("Ollama", "llama3.2:3b","user")
+    llm1 = GPTFactory.create_gpt_model("Ollama", "llama3.2:3b", "user")
+    #llm2 = GPTFactory.create_gpt_model("Ollama", "gemma2:2b", "assistant")
+    #llm2 = GPTFactory.create_gpt_model("ChatGPT", "gpt-4-turbo", "assistant")
     #llm2 = GPTFactory.create_gpt_model("ChatGPT", "gpt-3.5-turbo", "assistant")
-    #llm2 = GPTFactory.create_gpt_model("Ollama", "llama3.2:3b ", "assistant")
+    llm2 = GPTFactory.create_gpt_model("Ollama", "tinyllama:latest", "assistant")
 
     return llm1, llm2
 
@@ -39,7 +41,7 @@ def main():
 
     llm2_response = generate_and_print_response(llm2, initial_prompt, 1)
 
-    for i in range(2):
+    for i in range(10):
         llm1_response = generate_and_print_response(llm1, llm2_response, i+2)
         llm2_response = generate_and_print_response(llm2, llm1_response, i+2)
 

@@ -4,7 +4,7 @@ from gpt_factory import GPTFactory
 
 # Constants
 CONFIG_FILE = 'interview.properties'
-OUTPUT_FILE = 'output.txt'
+OUTPUT_FILE = 'output_qualitative.txt'
 DEFAULT_SECTION = 'DEFAULT'
 QUALITATIVE_SECTION = 'Qualitative'
 ERROR_CONFIG_NOT_FOUND = "The configuration file 'interview.properties' was not found."

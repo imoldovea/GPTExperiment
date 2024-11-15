@@ -1,54 +1,49 @@
 import configparser
 from gpt_model import GPTModel
 import ollama
-
-CONFIG_FILE = 'config.properties'
-CONFIG_SECTION = 'Ollama'
-TEMPERATURE_KEY = 'temperature'
-MAX_TOKENS_KEY = 'max_tokens'
-MODEL_NAME_KEY = 'model_name'
-INITIAL_INSTRUCTIONS_KEY = 'initial_instructions'
+import os
 
 
-def load_config(filename: str) -> configparser.ConfigParser:
+def load_config(filename: str, default_filename: str = 'default.properties') -> configparser.ConfigParser:
     config = configparser.ConfigParser()
+    if not os.path.exists(filename):
+        print(f"Warning: Configuration file '{filename}' not found. Falling back to default configuration.")
+        filename = default_filename
+
     try:
         with open(filename, 'r') as config_file:
             config.read_file(config_file)
     except FileNotFoundError:
-        raise FileNotFoundError(f"The configuration file '{filename}' was not found.")
+        raise FileNotFoundError(f"Neither the configuration file '{filename}' nor '{default_filename}' was found.")
     return config
 
 
-config = load_config(CONFIG_FILE)
+config = load_config('config.properties')
 
 
 class OllamaModel(GPTModel):
     def __init__(self, model: str, role: str):
         self.provider = "OLlama"
         self.role = role
-        self.temperature = config.get(CONFIG_SECTION, TEMPERATURE_KEY)
-        self.max_tokens = config.get(CONFIG_SECTION, MAX_TOKENS_KEY)
+        self.temperature = config.get('Ollama', 'temperature')
+        self.max_tokens = config.get('Ollama', 'max_tokens')
         self.history = []
-        self.model = model if model else config.get(CONFIG_SECTION, MODEL_NAME_KEY)
-        self.initial_instructions = config.get(CONFIG_SECTION, INITIAL_INSTRUCTIONS_KEY)
+        self.model = model or config.get('Ollama', 'model_name')
+        self.initial_instructions = config.get('Ollama', 'initial_instructions')
         self.history.append({"role": "system", "content": self.initial_instructions})
 
     def generate_response(self, prompt: str, use_history: bool = True) -> str:
-        chat_input = self._prepare_chat_input(prompt, use_history)
-        return self._fetch_response(chat_input, use_history)
-
-    def _prepare_chat_input(self, prompt: str, use_history: bool) -> list:
         if use_history:
             self.history.append({'role': self.role, 'content': prompt})
-            return self.history
-        return [{'role': self.role, 'content': prompt}]
+            chat_input = self.history
+        else:
+            chat_input = [{'role': self.role, 'content': prompt}]
 
-    def _fetch_response(self, chat_input: list, use_history: bool) -> str:
         try:
             response = ollama.chat(model=self.model, messages=chat_input)
         except Exception as e:
             return f"Model error: {e}"
+
         response_content = response['message']['content']
         if use_history:
             self.history.append({'role': self.role, 'content': response_content})
@@ -64,7 +59,7 @@ class OllamaModel(GPTModel):
         return self.history[-1]['content'] if self.history else ''
 
     def get_provider_model(self) -> str:
-        return f"{self.provider}/{self.model}"
+        return f"{self.provider}/{self.model} "
 
 
 if __name__ == "__main__":
